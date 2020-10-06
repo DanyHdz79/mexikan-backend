@@ -1,0 +1,69 @@
+type Query {
+    getUsers: [User!]!
+    logIn(user: logUser!): String!
+    getAllProducts: [Product!]!
+}
+
+type Mutation {
+    register(user:newUser!): Message!
+    addAddress(address:Address!): Boolean!
+    addProductToCart(product:cartProduct!): Boolean!
+    email(contact:contactInput!): Boolean!
+}
+
+input newUser {
+    email: String!
+    name: String!
+    password: String!
+    role: String
+}
+
+input logUser {
+    email: String!
+    password: String!
+}
+
+type User {
+    email: String!
+    name: String!
+    password: String!
+}
+
+type Message {
+    status: Boolean!
+    message: String
+}
+
+input contactInput {
+    name: String!
+    email: String!
+    message: String!
+}
+
+
+type Product {
+    sku: String!
+    name: String!
+    price: Float!
+    description: String
+}
+
+input cartProduct {
+    name: String
+    quantity: Int!
+    id_product: String!
+    id_order: Int
+    design: Int!
+    size: Int!
+    image: String
+}
+
+input Address {
+    street: String!
+    city: String!
+    state: String!
+    zip_code: String!
+    country: String!
+    phone_number: Int!
+    instructions: String
+}
