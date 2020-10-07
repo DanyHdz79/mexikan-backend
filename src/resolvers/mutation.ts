@@ -96,7 +96,7 @@ const mutation : IResolvers = {
         async addProductToCart(_:void, { product }, ctx) {
 
             let today = new Date();
-            let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+            // let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 
             let info: any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -123,7 +123,7 @@ const mutation : IResolvers = {
                 //console.log("checkOrder  " + checkOrder[0].id)
 
                 //if existe order con id_user
-                if(checkOrder !== null) {
+                if(!checkOrder && !checkOrder.length) {
                     //crea order_detail y añade a esa order
                     const orderD = await ctx.prisma.order_detail.create({
                         data: {
@@ -159,9 +159,9 @@ const mutation : IResolvers = {
                     //else crea order y añade order_detail
                     const newOrder = await ctx.prisma.order.create({
                         data: {
-                            date: date,
-                            subtotal: productInfo.prize,
-                            total: productInfo.prize * 1.16 + 10,
+                            date: today,
+                            subtotal: productInfo.price,
+                            total: productInfo.price * 1.16 + 10,
                             user: {
                                 connect: {
                                     id: user_id
