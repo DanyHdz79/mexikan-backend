@@ -119,11 +119,11 @@ const mutation : IResolvers = {
                         sku: product.id_product,
                     }
                 });
-
-                //console.log("checkOrder  " + checkOrder[0].id)
+                console.log(checkOrder && checkOrder.length)
+                //console.log("checkOrder  " + checkOrder[0])
 
                 //if existe order con id_user
-                if(!checkOrder && !checkOrder.length) {
+                if(checkOrder && checkOrder.length) {
                     //crea order_detail y añade a esa order
                     const orderD = await ctx.prisma.order_detail.create({
                         data: {
@@ -144,13 +144,24 @@ const mutation : IResolvers = {
                         }
                     })
                     //actualizar order
+                    //console.log("CheckOrder before update:" + checkOrder[0].id)
 
                     const updateOrder = await ctx.prisma.order.update({
                         where: {
                             id: checkOrder[0].id
                         },
                         data: {
-                            subtotal: checkOrder[0].subtotal + productInfo.prize,
+                            subtotal: checkOrder[0].subtotal + productInfo.price,
+                        }
+                    })
+                    
+                    console.log(checkOrder[0].subtotal);
+
+                    const updateOrderPt2 = await ctx.prisma.order.update({
+                        where: {
+                            id: checkOrder[0].id
+                        },
+                        data: {
                             total: checkOrder[0].subtotal * 1.16 + 10
                         }
                     })
