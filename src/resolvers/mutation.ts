@@ -96,7 +96,6 @@ const mutation : IResolvers = {
         async addProductToCart(_:void, { product }, ctx) {
 
             let today = new Date();
-            // let date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 
             let info: any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -119,8 +118,7 @@ const mutation : IResolvers = {
                         sku: product.id_product,
                     }
                 });
-                console.log(checkOrder && checkOrder.length)
-                //console.log("checkOrder  " + checkOrder[0])
+    
 
                 //if existe order con id_user
                 if(checkOrder && checkOrder.length) {
@@ -143,26 +141,28 @@ const mutation : IResolvers = {
                             //img_custom: product.image
                         }
                     })
+                    
                     //actualizar order
-                    //console.log("CheckOrder before update:" + checkOrder[0].id)
 
                     const updateOrder = await ctx.prisma.order.update({
                         where: {
                             id: checkOrder[0].id
                         },
                         data: {
-                            subtotal: checkOrder[0].subtotal + productInfo.price,
+                            subtotal: {
+                                increment: productInfo.price
+                            }
                         }
                     })
-                    
-                    console.log(checkOrder[0].subtotal);
 
-                    const updateOrderPt2 = await ctx.prisma.order.update({
+                    const updateOrder2 = await ctx.prisma.order.update({
                         where: {
                             id: checkOrder[0].id
                         },
                         data: {
-                            total: checkOrder[0].subtotal * 1.16 + 10
+                            total: {
+                                increment: productInfo.price + 20
+                            }
                         }
                     })
 

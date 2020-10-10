@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["atomicNumberOperations"]
 }
 
 datasource db {
@@ -38,7 +39,7 @@ model order {
   total        Float
   id_address   Int?
   id_user      Int
-  status       Boolean
+  status       Boolean?
   address      address?       @relation(fields: [id_address], references: [id])
   user         user           @relation(fields: [id_user], references: [id])
   order_detail order_detail[]
