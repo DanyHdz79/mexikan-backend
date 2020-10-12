@@ -206,7 +206,122 @@ const mutation : IResolvers = {
                 console.log(error);
                 return false
             }
+        },
+
+        async updateUserInfo(_:void, { user }, ctx) {
+
+            let today = new Date();
+
+            let info: any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            try {
+                const checkOrder = await ctx.prisma.order.findMany({
+                    where: {
+                        id_user: user_id,
+                        status: true
+                    }
+                });
+
+                const productInfo = await ctx.prisma.product.findOne({
+                    where: {
+                        sku: product.id_product,
+                    }
+                });
+    
+
+                //if existe order con id_user
+                if(checkOrder && checkOrder.length) {
+                    //crea order_detail y añade a esa order
+                    const orderD = await ctx.prisma.order_detail.create({
+                        data: {
+                            quantity: product.quantity,
+                            product: {
+                                connect: {
+                                    sku: product.id_product
+                                }
+                            },
+                            order: {
+                                connect: {
+                                    id: checkOrder[0].id
+                                }
+                            },
+                            design: product.design,
+                            size: product.size, 
+                            //img_custom: product.image
+                        }
+                    })
+                    
+                    // actualizar nombre
+                    const updateName = await ctx.prisma.order.update({
+                        where: {
+                            id: checkUser
+                        },
+                        data: {
+                            subtotal: {
+                                increment: productInfo.price
+                            }
+                        }
+                    })
+
+                    const updateOrder2 = await ctx.prisma.order.update({
+                        where: {
+                            id: checkOrder[0].id
+                        },
+                        data: {
+                            total: {
+                                increment: productInfo.price + 20
+                            }
+                        }
+                    })
+
+                } else {
+                    //else crea order y añade order_detail
+                    const newOrder = await ctx.prisma.order.create({
+                        data: {
+                            date: today,
+                            subtotal: productInfo.price,
+                            total: productInfo.price * 1.16 + 10,
+                            user: {
+                                connect: {
+                                    id: user_id
+                                }
+                            },
+                            status: true
+                        }
+                    })
+
+                    const orderD = await ctx.prisma.order_detail.create({
+                        data: {
+                            quantity: product.quantity,
+                            product: {
+                                connect: {
+                                    sku: product.id_product
+                                }
+                            },
+                            order: {
+                                connect: {
+                                    id: newOrder.id
+                                }
+                            },
+                            design: product.design,
+                            size: product.size, 
+                            //img_custom: product.image
+                        }
+                    })
+                }
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
         }
+
     }
 }
 
