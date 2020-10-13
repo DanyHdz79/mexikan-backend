@@ -9,6 +9,9 @@ type Mutation {
     addAddress(address:Address!): Boolean!
     addProductToCart(product:cartProduct!): Boolean!
     email(contact:contactInput!): Boolean!
+    updateUserName(new_name: String!): Boolean!
+    updateUserPassword(password: passwordPair!): Boolean!
+    change(pass: String!): Boolean!
 }
 
 input newUser {
@@ -66,4 +69,9 @@ input Address {
     country: String!
     phone_number: Int!
     instructions: String
+}
+
+input passwordPair {
+    old_password: String!
+    new_password: String!
 }

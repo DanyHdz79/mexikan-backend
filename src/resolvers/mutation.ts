@@ -208,11 +208,8 @@ const mutation : IResolvers = {
             }
         },
 
-        async updateUserInfo(_:void, { user }, ctx) {
-
-            let today = new Date();
-
-            let info: any = new JWT().verify(ctx.token)
+        async updateUserName(_:void, { new_name }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
             }
@@ -221,107 +218,79 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
-                const checkOrder = await ctx.prisma.order.findMany({
+                const newName = await ctx.prisma.user.update ({
                     where: {
-                        id_user: user_id,
-                        status: true
+                        id: user_id
+                    },
+                    data: {
+                        name: new_name
                     }
-                });
+                })
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
 
-                const productInfo = await ctx.prisma.product.findOne({
-                    where: {
-                        sku: product.id_product,
-                    }
-                });
-    
+        async updateUserPassword(_:void, { password }, ctx) {
+            let verification = false
 
-                //if existe order con id_user
-                if(checkOrder && checkOrder.length) {
-                    //crea order_detail y añade a esa order
-                    const orderD = await ctx.prisma.order_detail.create({
-                        data: {
-                            quantity: product.quantity,
-                            product: {
-                                connect: {
-                                    sku: product.id_product
-                                }
-                            },
-                            order: {
-                                connect: {
-                                    id: checkOrder[0].id
-                                }
-                            },
-                            design: product.design,
-                            size: product.size, 
-                            //img_custom: product.image
-                        }
-                    })
-                    
-                    // actualizar nombre
-                    const updateName = await ctx.prisma.order.update({
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            const thisUser = await ctx.prisma.user.findOne({
+                where: {
+                    id: user_id
+                }
+            })
+
+            if (!bcryptjs.compareSync(thisUser.password, password.old_password)) {
+                verification = true
+            } 
+
+            try {
+                if(verification) {
+                    const newPassword = await ctx.prisma.user.update ({
                         where: {
-                            id: checkUser
+                            id: user_id
                         },
                         data: {
-                            subtotal: {
-                                increment: productInfo.price
-                            }
-                        }
-                    })
-
-                    const updateOrder2 = await ctx.prisma.order.update({
-                        where: {
-                            id: checkOrder[0].id
-                        },
-                        data: {
-                            total: {
-                                increment: productInfo.price + 20
-                            }
-                        }
-                    })
-
-                } else {
-                    //else crea order y añade order_detail
-                    const newOrder = await ctx.prisma.order.create({
-                        data: {
-                            date: today,
-                            subtotal: productInfo.price,
-                            total: productInfo.price * 1.16 + 10,
-                            user: {
-                                connect: {
-                                    id: user_id
-                                }
-                            },
-                            status: true
-                        }
-                    })
-
-                    const orderD = await ctx.prisma.order_detail.create({
-                        data: {
-                            quantity: product.quantity,
-                            product: {
-                                connect: {
-                                    sku: product.id_product
-                                }
-                            },
-                            order: {
-                                connect: {
-                                    id: newOrder.id
-                                }
-                            },
-                            design: product.design,
-                            size: product.size, 
-                            //img_custom: product.image
+                            password: bcryptjs.hashSync(password.new_password,10)
                         }
                     })
                 }
+
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        async change(_:void, { pass }, ctx) {
+
+            try {
+                const newPassword = await ctx.prisma.user.update ({
+                    where: {
+                        id: 2
+                    },
+                    data: {
+                        password: bcryptjs.hashSync(pass,10)
+                    }
+                })
+
                 return true
             } catch (error) {
                 console.log(error);
                 return false
             }
         }
-
     }
 }
 
