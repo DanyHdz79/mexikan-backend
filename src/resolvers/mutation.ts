@@ -273,24 +273,32 @@ const mutation : IResolvers = {
             }
         },
 
-        async change(_:void, { pass }, ctx) {
+        async convertToOrder(_:void, { CHOSEN ADDRESS }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
 
             try {
-                const newPassword = await ctx.prisma.user.update ({
+                let order = ctx.prisma.order.update({
                     where: {
-                        id: 2
+                        id_user: user_id,
+                        status: true
                     },
                     data: {
-                        password: bcryptjs.hashSync(pass,10)
+                        status:false
                     }
-                })
-
+                });
                 return true
             } catch (error) {
                 console.log(error);
                 return false
             }
-        }
+        },
+
     }
 }
 
