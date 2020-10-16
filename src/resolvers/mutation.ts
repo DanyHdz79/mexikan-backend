@@ -273,7 +273,7 @@ const mutation : IResolvers = {
             }
         },
 
-        async convertToOrder(_:void, { CHOSEN ADDRESS }, ctx) {
+        /*async convertToOrder(_:void, { CHOSEN ADDRESS }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -297,7 +297,7 @@ const mutation : IResolvers = {
                 console.log(error);
                 return false
             }
-        },
+        },*/
 
     }
 }

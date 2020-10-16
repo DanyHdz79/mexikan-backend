@@ -33,6 +33,54 @@ const query : IResolvers = {
                 console.log(error)
                 return []
             }
+        },
+
+        async showCart(_:void, __:void, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            
+
+            try {
+                const checkOrder = await ctx.prisma.order.findMany({
+                    where: {
+                        id_user: user_id,
+                        status: true
+                    }
+                });
+    
+                if(checkOrder && checkOrder.length) {
+                    const id_cart = checkOrder[0].id
+                    const cartProducts = await ctx.prisma.orderDetail.findMany({
+                        where: {
+                            id_order: id_cart,
+                        }
+                    })
+
+                    let productArray = []
+
+                    for(let i = 0; i < cartProducts.length; i++) {
+                        const productInfo = await ctx.prisma.product.findOne({
+                            where: {
+                                sku: cartProducts[i].id_product,
+                            }
+                        })
+                        productArray.push(productInfo)
+                    }
+
+                    return productArray
+                }
+
+                return [];
+            } catch (error) {
+                console.log(error)
+                return []
+            }
         }
     }
 }
