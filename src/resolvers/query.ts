@@ -56,7 +56,7 @@ const query : IResolvers = {
     
                 if(checkOrder && checkOrder.length) {
                     const id_cart = checkOrder[0].id
-                    const cartProducts = await ctx.prisma.orderDetail.findMany({
+                    const cartProducts = await ctx.prisma.order_detail.findMany({
                         where: {
                             id_order: id_cart,
                         }
