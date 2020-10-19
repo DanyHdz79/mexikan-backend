@@ -119,31 +119,53 @@ const mutation : IResolvers = {
                     }
                 });
     
-
                 //if existe order con id_user
                 if(checkOrder && checkOrder.length) {
                     //crea order_detail y añade a esa order
-                    const orderD = await ctx.prisma.order_detail.create({
-                        data: {
-                            quantity: product.quantity,
-                            product: {
-                                connect: {
-                                    sku: product.id_product
-                                }
-                            },
-                            order: {
-                                connect: {
-                                    id: checkOrder[0].id
-                                }
-                            },
+                    
+                    const repeatedProduct = await ctx.prisma.order_detail.findMany({
+                        where: {
+                            id_product: product.id_product,
+                            id_order: checkOrder[0].id,
                             design: product.design,
-                            size: product.size, 
-                            //img_custom: product.image
+                            size: product.size
                         }
-                    })
+                    });
+
+                    if(repeatedProduct && repeatedProduct.length) {
+                        const upQuantity = await ctx.prisma.order_detail.update({
+                            where: {
+                                id: repeatedProduct[0].id
+                            },
+                            data: {
+                                quantity: {
+                                    increment: 1
+                                }
+                            }
+                        })
+
+                    } else {
+                        const orderD = await ctx.prisma.order_detail.create({
+                            data: {
+                                quantity: product.quantity,
+                                product: {
+                                    connect: {
+                                        sku: product.id_product
+                                    }
+                                },
+                                order: {
+                                    connect: {
+                                        id: checkOrder[0].id
+                                    }
+                                },
+                                design: product.design,
+                                size: product.size, 
+                                //img_custom: product.image
+                            }
+                        })
+                    }
                     
                     //actualizar order
-
                     const updateOrder = await ctx.prisma.order.update({
                         where: {
                             id: checkOrder[0].id
@@ -161,7 +183,7 @@ const mutation : IResolvers = {
                         },
                         data: {
                             total: {
-                                increment: productInfo.price + 20
+                                increment: productInfo.price + 10
                             }
                         }
                     })
@@ -250,7 +272,7 @@ const mutation : IResolvers = {
                 }
             })
 
-            if (!bcryptjs.compareSync(thisUser.password, password.old_password)) {
+            if (bcryptjs.compareSync(password.old_password, thisUser.password)) {
                 verification = true
             } 
 
@@ -264,9 +286,9 @@ const mutation : IResolvers = {
                             password: bcryptjs.hashSync(password.new_password,10)
                         }
                     })
+                    return true
                 }
-
-                return true
+                return false
             } catch (error) {
                 console.log(error);
                 return false
