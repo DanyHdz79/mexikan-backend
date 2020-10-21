@@ -1,0 +1,126 @@
+MEXIKAN CHEAT-SHEET
+
+mutation signUp($user: newUser!) {
+  register(user: $user) {
+    message
+  }
+}
+
+query signIn($user: logUser!) {
+  logIn(user: $user)
+}
+
+mutation newAdress($address: Address!) {
+  addAddress(address: $address) 
+}
+
+query products {
+  getAllProducts {
+    sku
+    name
+    price
+    description
+    img
+  }
+}
+
+mutation addCart($cartP: cartProduct!) {
+  addProductToCart(product: $cartP)
+}
+
+mutation email($contact: contactInput!) {
+  email(contact: $contact)
+}
+
+mutation updateName($name: String!) {
+  updateUserName(new_name: $name)
+}
+
+mutation updatePassword($password: passwordPair!) {
+  updateUserPassword(password: $password)
+}
+
+query productInfo($sku: String!) {
+  getProductInfo(product_id: $sku) {
+    name
+    description
+  }
+}
+
+query showCart {
+  showCart {
+    id_product
+    design
+    quantity
+  }
+}
+
+query getAddresses {
+  getAllUserAddresses {
+    street,
+    city
+  }
+}
+
+mutation buyCart($id_address: Int!) {
+  convertToOrder(id_address: $id_address)
+}
+
+mutation addQ($id_item: Int!) {
+  addQuantity(id_item: $id_item)
+}
+
+mutation restQ($id_item: Int!) {
+  restQuantity(id_item: $id_item)
+}
+
+mutation deleteP($id_item: Int!) {
+  deleteItem(id_item: $id_item)
+}
+
+
+// -------------------------- Query variables -----------------------
+
+{
+  "user": {
+  	"email": "dany.hdz@gmail.com",
+    "name": "Dany Hdz",
+    "password": "baldonic1!"
+	}
+}
+
+
+
+{
+  "address": {
+    "street": "Pentenrieder Str.",
+    "city": "München",
+    "state": "Bayern",
+    "zip_code": "A72197",
+    "country": "Deutschland",
+    "phone_number": 4315214,
+    "instructions": "ミグは愛です",
+    "id_user": 1
+  }
+}
+
+
+{
+  "cartP": {
+    "quantity": 1,
+    "id_product": "MBX45927",
+    "design": 2,
+    "size": 1
+  }
+}
+
+
+{
+  "password": {
+    "old_password": "baldonic1!",
+    "new_password": "baldonic2!"
+  }
+}
+
+
+

@@ -35,6 +35,25 @@ const query : IResolvers = {
             }
         },
 
+        async getProductInfo(_:void, { product_id }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return []
+            }
+
+            try {
+                const info = await ctx.prisma.product.findOne({
+                    where: {
+                        sku: product_id
+                    }
+                })
+                return info;
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        },
+
         async showCart(_:void, __:void, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -43,8 +62,6 @@ const query : IResolvers = {
 
             let decoded:any = new JWT().decode(ctx.token)
             let user_id = decoded.user
-
-            
 
             try {
                 const checkOrder = await ctx.prisma.order.findMany({
@@ -62,7 +79,7 @@ const query : IResolvers = {
                         }
                     })
 
-                    let productArray = []
+                    /* let productArray = []
 
                     for(let i = 0; i < cartProducts.length; i++) {
                         const productInfo = await ctx.prisma.product.findOne({
@@ -71,9 +88,9 @@ const query : IResolvers = {
                             }
                         })
                         productArray.push(productInfo)
-                    }
+                    } */
 
-                    return productArray
+                    return cartProducts
                 }
 
                 return [];

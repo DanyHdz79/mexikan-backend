@@ -2,7 +2,8 @@ type Query {
     getUsers: [User!]!
     logIn(user: logUser!): String!
     getAllProducts: [Product!]!
-    showCart: [Product!]!
+    getProductInfo(product_id: String!): Product!
+    showCart: [Item!]!
     getAllUserAddresses: [Address2!]!
 }
 
@@ -13,7 +14,10 @@ type Mutation {
     email(contact:contactInput!): Boolean!
     updateUserName(new_name: String!): Boolean!
     updateUserPassword(password: passwordPair!): Boolean!
-    convertToOrder(id_address: Int!): Boolean!
+    convertToOrder(id_address: Int): Boolean!
+    deleteItem(id_item: Int!): Boolean!
+    addQuantity(id_item: Int!): Boolean!
+    restQuantity(id_item: Int!): Boolean!
 }
 
 input newUser {
@@ -55,6 +59,15 @@ type Product {
 }
 
 input cartProduct {
+    quantity: Int!
+    id_product: String!
+    id_order: Int
+    design: Int!
+    size: Int!
+    image: String
+}
+
+type Item {
     quantity: Int!
     id_product: String!
     id_order: Int

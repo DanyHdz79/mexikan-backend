@@ -189,20 +189,55 @@ const mutation : IResolvers = {
                     })
 
                 } else {
-                    //else crea order y añade order_detail
-                    const newOrder = await ctx.prisma.order.create({
-                        data: {
-                            date: today,
-                            subtotal: productInfo.price,
-                            total: productInfo.price * 1.16 + 10,
-                            user: {
-                                connect: {
-                                    id: user_id
-                                }
-                            },
-                            status: true
+                    const default_address = await ctx.prisma.address.findMany({
+                        where: {
+                            id_user: user_id
                         }
                     })
+
+                    //else crea order y añade order_detail
+                    let newOrder
+
+                    if(default_address && default_address.length) {
+                        newOrder = await ctx.prisma.order.create({
+                            data: {
+                                date: today,
+                                subtotal: productInfo.price,
+                                total: productInfo.price * 1.16 + 10,
+                                user: {
+                                    connect: {
+                                        id: user_id
+                                    }
+                                },
+                                address: {
+                                    connect: {
+                                        id: default_address[0].id
+                                    }
+                                },
+                                status: true
+                            }
+                        })
+                    } else {
+                        newOrder = await ctx.prisma.order.create({
+                            data: {
+                                date: today,
+                                subtotal: productInfo.price,
+                                total: productInfo.price * 1.16 + 10,
+                                user: {
+                                    connect: {
+                                        id: user_id
+                                    }
+                                },
+                                address: {
+                                    connect: {
+                                        id: default_address[0].id
+                                    }
+                                },
+                                status: true
+                            }
+                        })
+                    }
+
 
                     const orderD = await ctx.prisma.order_detail.create({
                         data: {
@@ -305,13 +340,6 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
-                /* const findAddress = ctx.prisma.address.findOne({
-                    where: {
-                        id: id_address
-                    }
-                })
-                console.log(findAddress) */
-
                 const findCarrito = await ctx.prisma.order.findMany({
                     where: {
                         id_user: user_id,
@@ -337,7 +365,75 @@ const mutation : IResolvers = {
                 console.log(error);
                 return false
             }
+        },
+
+        async deleteItem(_:void, { id_item }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const deleteItem = await ctx.prisma.order_detail.delete({
+                    where: {
+                        id: id_item,
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        async addQuantity(_:void, { id_item }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const increment = await ctx.prisma.order_detail.update({
+                    where: {
+                        id: id_item,
+                    },
+                    data: {
+                        quantity: {
+                            increment: 1
+                        }
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        async restQuantity(_:void, { id_item }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const decrement = await ctx.prisma.order_detail.update({
+                    where: {
+                        id: id_item,
+                    },
+                    data: {
+                        quantity: {
+                            decrement: 1
+                        }
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
         }
+
 
     }
 }
