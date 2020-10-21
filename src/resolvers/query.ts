@@ -81,7 +81,29 @@ const query : IResolvers = {
                 console.log(error)
                 return []
             }
-        }
+        },
+
+        async getAllUserAddresses(_:void, __:void, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            try {
+                const addresses = await ctx.prisma.address.findMany({
+                    where: {
+                        id_user: user_id
+                    }
+                })
+                return addresses;
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        },
     }
 }
 

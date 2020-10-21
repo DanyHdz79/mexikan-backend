@@ -3,6 +3,7 @@ type Query {
     logIn(user: logUser!): String!
     getAllProducts: [Product!]!
     showCart: [Product!]!
+    getAllUserAddresses: [Address2!]!
 }
 
 type Mutation {
@@ -12,6 +13,7 @@ type Mutation {
     email(contact:contactInput!): Boolean!
     updateUserName(new_name: String!): Boolean!
     updateUserPassword(password: passwordPair!): Boolean!
+    convertToOrder(id_address: Int!): Boolean!
 }
 
 input newUser {
@@ -62,6 +64,16 @@ input cartProduct {
 }
 
 input Address {
+    street: String!
+    city: String!
+    state: String!
+    zip_code: String!
+    country: String!
+    phone_number: Int!
+    instructions: String
+}
+
+type Address2 {
     street: String!
     city: String!
     state: String!

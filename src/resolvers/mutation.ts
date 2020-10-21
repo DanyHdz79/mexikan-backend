@@ -295,7 +295,7 @@ const mutation : IResolvers = {
             }
         },
 
-        /*async convertToOrder(_:void, { CHOSEN ADDRESS }, ctx) {
+        async convertToOrder(_:void, { id_address }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -305,13 +305,31 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
-                let order = ctx.prisma.order.update({
+                /* const findAddress = ctx.prisma.address.findOne({
+                    where: {
+                        id: id_address
+                    }
+                })
+                console.log(findAddress) */
+
+                const findCarrito = await ctx.prisma.order.findMany({
                     where: {
                         id_user: user_id,
                         status: true
+                    }
+                });
+
+                const order = await ctx.prisma.order.update({
+                  where: {
+                        id: findCarrito[0].id
                     },
                     data: {
-                        status:false
+                        status: false,
+                        address: {
+                            connect: {
+                                id: id_address
+                            }
+                        }
                     }
                 });
                 return true
@@ -319,7 +337,7 @@ const mutation : IResolvers = {
                 console.log(error);
                 return false
             }
-        },*/
+        }
 
     }
 }
