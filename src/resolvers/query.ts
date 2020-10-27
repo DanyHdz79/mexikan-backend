@@ -63,6 +63,8 @@ const query : IResolvers = {
             let decoded:any = new JWT().decode(ctx.token)
             let user_id = decoded.user
 
+            let cartArray = [];
+
             try {
                 const checkOrder = await ctx.prisma.order.findMany({
                     where: {
@@ -79,7 +81,24 @@ const query : IResolvers = {
                         }
                     })
 
-                    /* let productArray = []
+                    for(let i = 0; i < cartProducts.length; i++) {
+                        let cartItem = {
+                            sku: "",
+                            name: "",
+                            price: 0.0,
+                            description: "",
+                            quantity: 0,
+                            design: 0,
+                            size: 0,
+                            image: "",
+                        };
+            
+                        cartItem.sku = cartProducts[i].id_product;
+                        cartItem.quantity = cartProducts[i].quantity;
+                        cartItem.design = cartProducts[i].design;
+                        cartItem.size = cartProducts[i].size;
+                        cartArray.push(cartItem);
+                    }
 
                     for(let i = 0; i < cartProducts.length; i++) {
                         const productInfo = await ctx.prisma.product.findOne({
@@ -87,13 +106,15 @@ const query : IResolvers = {
                                 sku: cartProducts[i].id_product,
                             }
                         })
-                        productArray.push(productInfo)
-                    } */
+                        cartArray[i].name = productInfo.name;
+                        cartArray[i].description = productInfo.description;
+                        cartArray[i].price = productInfo.price;
+                        cartArray[i].image = productInfo.img;
+                    }
 
-                    return cartProducts
+                    return cartArray;
                 }
-
-                return [];
+                 return [];
             } catch (error) {
                 console.log(error)
                 return []

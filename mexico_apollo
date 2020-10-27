@@ -49,9 +49,13 @@ query productInfo($sku: String!) {
 
 query showCart {
   showCart {
-    id_product
+    sku
+    name
+    price
     design
     quantity
+    size
+  	image
   }
 }
 

@@ -69,12 +69,14 @@ input cartProduct {
 }
 
 type Item {
+    sku: String!
+    name: String!
+    price: Float!
+    description: String!
     quantity: Int!
-    id_product: String!
-    id_order: Int
     design: Int!
     size: Int!
-    image: String
+    image: String!
 }
 
 input Address {
