@@ -121,6 +121,29 @@ const query : IResolvers = {
                 return []
             }
         },
+
+        async report(_:void, __:void, ctx) {
+            /* let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            } 
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user */
+
+
+            try {
+                const orders = await ctx.prisma.order.findMany({
+                    where: {
+                        status: false
+                    }
+                })
+                return orders;
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        }
     }
 }
 

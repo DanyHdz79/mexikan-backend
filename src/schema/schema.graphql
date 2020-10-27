@@ -5,6 +5,7 @@ type Query {
     getProductInfo(product_id: String!): Product!
     showCart: [Item!]!
     getAllUserAddresses: [Address2!]!
+    report: [Order!]!
 }
 
 type Mutation {
@@ -99,4 +100,12 @@ type Address2 {
 input passwordPair {
     old_password: String!
     new_password: String!
+}
+
+type Order {
+    id: Int!
+    date: String!
+    total: Float!
+    id_address: Int!
+    id_user: Int!
 }
