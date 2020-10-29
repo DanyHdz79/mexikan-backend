@@ -18,7 +18,8 @@ type Mutation {
     convertToOrder(id_address: Int): Boolean!
     deleteItem(id_item: Int!): Boolean!
     addQuantity(id_item: Int!): Boolean!
-    restQuantity(id_item: Int!): Boolean!
+    subtQuantity(id_item: Int!): Boolean!
+    deleteAddress(id_address: Int!): Boolean!
 }
 
 input newUser {

@@ -80,6 +80,25 @@ const mutation : IResolvers = {
             }
         },
 
+        async deleteAddress(_:void, { id_address }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const newAddress = await ctx.prisma.address.delete({
+                    where: {
+                        id: id_address
+                    }
+                })
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
         async email(_:void, { contact }, __:void) {
             let mail:any = new nmail()
             var mailOptions = {
@@ -410,7 +429,7 @@ const mutation : IResolvers = {
             }
         },
 
-        async restQuantity(_:void, { id_item }, ctx) {
+        async subtQuantity(_:void, { id_item }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false

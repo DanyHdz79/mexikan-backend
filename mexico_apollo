@@ -75,7 +75,7 @@ mutation addQ($id_item: Int!) {
 }
 
 mutation restQ($id_item: Int!) {
-  restQuantity(id_item: $id_item)
+  subtQuantity(id_item: $id_item)
 }
 
 mutation deleteP($id_item: Int!) {
