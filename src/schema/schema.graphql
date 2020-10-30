@@ -4,8 +4,10 @@ type Query {
     getAllProducts: [Product!]!
     getProductInfo(product_id: String!): Product!
     showCart: [Item!]!
+    prevOrders: [Item2!]!
     getAllUserAddresses: [Address2!]!
     report: [Order!]!
+    searchBar(search: String!): [Product!]!
 }
 
 type Mutation {
@@ -20,6 +22,7 @@ type Mutation {
     addQuantity(id_item: Int!): Boolean!
     subtQuantity(id_item: Int!): Boolean!
     deleteAddress(id_address: Int!): Boolean!
+    princAddress(id_address: Int!): Boolean!
 }
 
 input newUser {
@@ -51,7 +54,6 @@ input contactInput {
     message: String!
 }
 
-
 type Product {
     sku: String!
     name: String!
@@ -70,6 +72,18 @@ input cartProduct {
 }
 
 type Item {
+    sku: String!
+    name: String!
+    price: Float!
+    description: String!
+    quantity: Int!
+    design: Int!
+    size: Int!
+    image: String!
+}
+
+type Item2 {
+    id_order: Int!
     sku: String!
     name: String!
     price: Float!

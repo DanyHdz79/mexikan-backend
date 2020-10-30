@@ -57,6 +57,52 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
+                let flag = true
+                const princ = await ctx.prisma.address.findMany({
+                    where: {
+                        id_user: user_id,
+                        principal: true
+                    }
+                });
+
+                if(princ && princ.length) {
+                    const newAddress = await ctx.prisma.address.create({
+                        data: {
+                            street: address.street,
+                            city: address.city,
+                            state: address.state,
+                            zip_code: address.zip_code,
+                            country: address.country,
+                            phone_number: address.phone_number,
+                            instructions: address.instructions,
+                            user: {
+                                connect: {
+                                    id: user_id
+                                },
+                            },
+                            principal: false
+                        }
+                    })
+                } else {
+                    const newAddress = await ctx.prisma.address.create({
+                        data: {
+                            street: address.street,
+                            city: address.city,
+                            state: address.state,
+                            zip_code: address.zip_code,
+                            country: address.country,
+                            phone_number: address.phone_number,
+                            instructions: address.instructions,
+                            user: {
+                                connect: {
+                                    id: user_id
+                                },
+                            },
+                            principal: false
+                        }
+                    })
+                }
+
                 const newAddress = await ctx.prisma.address.create({
                     data: {
                         street: address.street,
@@ -71,6 +117,7 @@ const mutation : IResolvers = {
                                 id: user_id
                             },
                         },
+                        principal: true
                     }
                 })
                 return true
@@ -210,7 +257,8 @@ const mutation : IResolvers = {
                 } else {
                     const default_address = await ctx.prisma.address.findMany({
                         where: {
-                            id_user: user_id
+                            id_user: user_id,
+                            principal: true
                         }
                     })
 
@@ -451,7 +499,55 @@ const mutation : IResolvers = {
                 console.log(error);
                 return false
             }
-        }
+        },
+
+        async princAddress(_:void, { id_address }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            try {
+                const princ = await ctx.prisma.address.findMany({
+                    where: {
+                        id_user: user_id,
+                        principal: true
+                    }
+                });
+
+                if(princ && princ.length) {
+                    for(let i = 0; i < princ.length; i++) {
+                        if(princ[i].principal == true) {
+                            const def = await ctx.prisma.order.update({
+                                where: {
+                                        id: princ[i].id
+                                    },
+                                data: {
+                                    principal: false,
+                                }
+                            })
+                        }
+                    }
+                }
+
+                const def = await ctx.prisma.order.update({
+                    where: {
+                            id: id_address
+                        },
+                    data: {
+                        principal: true,
+                    }
+                })
+                
+               return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
 
 
     }

@@ -83,20 +83,16 @@ const query : IResolvers = {
 
                     for(let i = 0; i < cartProducts.length; i++) {
                         let cartItem = {
-                            sku: "",
+                            sku: cartProducts[i].id_product,
                             name: "",
                             price: 0.0,
                             description: "",
-                            quantity: 0,
-                            design: 0,
+                            quantity: cartProducts[i].quantity,
+                            design: cartProducts[i].design,
                             size: 0,
-                            image: "",
+                            image: cartProducts[i].size,
                         };
             
-                        cartItem.sku = cartProducts[i].id_product;
-                        cartItem.quantity = cartProducts[i].quantity;
-                        cartItem.design = cartProducts[i].design;
-                        cartItem.size = cartProducts[i].size;
                         cartArray.push(cartItem);
                     }
 
@@ -143,6 +139,70 @@ const query : IResolvers = {
             }
         },
 
+        async prevOrders(_:void, __:void, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            } 
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            let cartArray = [];
+
+            try {
+                const orders = await ctx.prisma.order.findMany({
+                    where: {
+                        id_user: user_id,
+                        status: false
+                    }
+                });
+
+                if(orders && orders.length) {
+                    const id_cart = orders[0].id
+                    const cartProducts = await ctx.prisma.order_detail.findMany({
+                        where: {
+                            id_order: id_cart,
+                        }
+                    })
+
+                    for(let i = 0; i < cartProducts.length; i++) {
+                        let cartItem = {
+                            id_order: id_cart,
+                            sku: cartProducts[i].id_product,
+                            name: "",
+                            price: 0.0,
+                            description: "",
+                            quantity: cartProducts[i].quantity,
+                            design: cartProducts[i].design,
+                            size: 0,
+                            image: cartProducts[i].size,
+                        };
+            
+                        cartArray.push(cartItem);
+                    }
+
+                    for(let i = 0; i < cartProducts.length; i++) {
+                        const productInfo = await ctx.prisma.product.findOne({
+                            where: {
+                                sku: cartProducts[i].id_product,
+                            }
+                        })
+                        cartArray[i].name = productInfo.name;
+                        cartArray[i].description = productInfo.description;
+                        cartArray[i].price = productInfo.price;
+                        cartArray[i].image = productInfo.img;
+                    }
+
+                    return cartArray;
+                }
+                 return [];
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        },
+
         async report(_:void, __:void, ctx) {
             /* let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -160,6 +220,22 @@ const query : IResolvers = {
                     }
                 })
                 return orders;
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        },
+
+        async searchBar(_:void, { search }, ctx) {
+            try {
+                const match = await ctx.prisma.product.findMany({
+                    where: {
+                        name: {
+                            contains: search
+                        }
+                    }
+                })
+                return match;
             } catch (error) {
                 console.log(error)
                 return []
