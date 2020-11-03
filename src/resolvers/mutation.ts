@@ -98,12 +98,12 @@ const mutation : IResolvers = {
                                     id: user_id
                                 },
                             },
-                            principal: false
+                            principal: true
                         }
                     })
                 }
 
-                const newAddress = await ctx.prisma.address.create({
+                /*const newAddress = await ctx.prisma.address.create({
                     data: {
                         street: address.street,
                         city: address.city,
@@ -119,7 +119,7 @@ const mutation : IResolvers = {
                         },
                         principal: true
                     }
-                })
+                })*/
                 return true
             } catch (error) {
                 console.log(error);
