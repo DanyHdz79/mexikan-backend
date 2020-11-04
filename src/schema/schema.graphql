@@ -5,7 +5,8 @@ type Query {
     getProductInfo(product_id: String!): Product!
     showCart: [Item!]!
     prevOrders: [Item2!]!
-    getAllUserAddresses: [Address2!]!
+    getUserAddresses: [Address2!]!
+    getPrincUserAddress: [Address2!]!
     report: [Order!]!
     searchBar(search: String!): [Product!]!
 }
@@ -94,6 +95,13 @@ type Item2 {
     image: String!
 }
 
+type Item3 {
+    id_product: String!
+    quantity: Int!
+    design: Int!
+    size: Int!
+}
+
 input Address {
     street: String!
     city: String!
@@ -121,8 +129,9 @@ input passwordPair {
 
 type Order {
     id: Int!
-    date: String!
+    user: Int!
     total: Float!
-    id_address: Int!
-    id_user: Int!
+    date: String!
+    address: Address2
+    productDetails: [Item3!]!,
 }

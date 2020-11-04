@@ -1,5 +1,6 @@
 MEXIKAN CHEAT-SHEET
 
+
 mutation signUp($user: newUser!) {
   register(user: $user) {
     message
@@ -14,13 +15,20 @@ mutation newAdress($address: Address!) {
   addAddress(address: $address) 
 }
 
+mutation deleteAddress($id_address: Int!) {
+  deleteAddress(id_address: $id_address)
+}
+
+mutation principalA($id_address: Int!) {
+  princAddress(id_address: $id_address)
+}
+
 query products {
   getAllProducts {
     sku
     name
     price
     description
-    img
   }
 }
 
@@ -59,8 +67,28 @@ query showCart {
   }
 }
 
+query prevO {
+  prevOrders {
+    id_order
+    sku
+    name
+    price
+    design
+    quantity
+    size
+  	image
+  }
+}
+
 query getAddresses {
-  getAllUserAddresses {
+  getUserAddresses {
+    street,
+    city
+  }
+}
+
+query getPrincipalA {
+  getPrincUserAddress {
     street,
     city
   }
@@ -74,12 +102,38 @@ mutation addQ($id_item: Int!) {
   addQuantity(id_item: $id_item)
 }
 
-mutation subtQ($id_item: Int!) {
+mutation restQ($id_item: Int!) {
   subtQuantity(id_item: $id_item)
 }
 
 mutation deleteP($id_item: Int!) {
   deleteItem(id_item: $id_item)
+}
+
+query report {
+  report {
+    id
+    user
+    total
+    date
+    address {
+      street
+      country
+    }
+    productDetails {
+      id_product
+      quantity
+      design
+      size
+    }
+  }
+}
+
+query search($search: String!) {
+  searchBar(search: $search) {
+    name
+    sku
+  }
 }
 
 
@@ -103,8 +157,7 @@ mutation deleteP($id_item: Int!) {
     "zip_code": "A72197",
     "country": "Deutschland",
     "phone_number": 4315214,
-    "instructions": "ミグは愛です",
-    "id_user": 1
+    "instructions": "ミグは愛です"
   }
 }
 

@@ -57,7 +57,6 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
-                let flag = true
                 const princ = await ctx.prisma.address.findMany({
                     where: {
                         id_user: user_id,
@@ -102,24 +101,6 @@ const mutation : IResolvers = {
                         }
                     })
                 }
-
-                /*const newAddress = await ctx.prisma.address.create({
-                    data: {
-                        street: address.street,
-                        city: address.city,
-                        state: address.state,
-                        zip_code: address.zip_code,
-                        country: address.country,
-                        phone_number: address.phone_number,
-                        instructions: address.instructions,
-                        user: {
-                            connect: {
-                                id: user_id
-                            },
-                        },
-                        principal: true
-                    }
-                })*/
                 return true
             } catch (error) {
                 console.log(error);
@@ -249,7 +230,7 @@ const mutation : IResolvers = {
                         },
                         data: {
                             total: {
-                                increment: productInfo.price + 10
+                                increment: productInfo.price
                             }
                         }
                     })
@@ -521,7 +502,7 @@ const mutation : IResolvers = {
                 if(princ && princ.length) {
                     for(let i = 0; i < princ.length; i++) {
                         if(princ[i].principal == true) {
-                            const def = await ctx.prisma.order.update({
+                            const def = await ctx.prisma.address.update({
                                 where: {
                                         id: princ[i].id
                                     },
@@ -533,7 +514,7 @@ const mutation : IResolvers = {
                     }
                 }
 
-                const def = await ctx.prisma.order.update({
+                const def = await ctx.prisma.address.update({
                     where: {
                             id: id_address
                         },

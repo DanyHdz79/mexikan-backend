@@ -117,7 +117,7 @@ const query : IResolvers = {
             }
         },
 
-        async getAllUserAddresses(_:void, __:void, ctx) {
+        async getUserAddresses(_:void, __:void, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -129,10 +129,34 @@ const query : IResolvers = {
             try {
                 const addresses = await ctx.prisma.address.findMany({
                     where: {
-                        id_user: user_id
+                        id_user: user_id,
+                        principal: false
                     }
                 })
                 return addresses;
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        },
+
+        async getPrincUserAddress(_:void, __:void, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            try {
+                const address = await ctx.prisma.address.findMany({
+                    where: {
+                        id_user: user_id,
+                        principal: true
+                    }
+                })
+                return address;
             } catch (error) {
                 console.log(error)
                 return []
@@ -219,7 +243,38 @@ const query : IResolvers = {
                         status: false
                     }
                 })
-                return orders;
+
+                let reportObjArr = []
+
+                for(let i = 0; i < orders.length; i++) {
+                    let order_id = orders[i].id
+                    let orderInfo = await ctx.prisma.order_detail.findMany({
+                        where: {
+                            id_order: order_id
+                        }
+                    })
+
+                    let orderAddress = await ctx.prisma.address.findOne({
+                        where: {
+                            id: orders[i].id_address
+                        }
+                    })
+
+                    let time = orders[i].date.getTime()
+                    let date = new Date(time)
+
+                    let reportObj = {
+                        id: order_id,
+                        user: orders[i].id_user,
+                        total: orders[i].total,
+                        address: orderAddress,
+                        date: date.toString(),
+                        productDetails: orderInfo,
+                    };
+                    
+                    reportObjArr.push(reportObj)
+                }
+                return reportObjArr;
             } catch (error) {
                 console.log(error)
                 return []
