@@ -24,6 +24,7 @@ type Mutation {
     subtQuantity(id_item: Int!): Boolean!
     deleteAddress(id_address: Int!): Boolean!
     princAddress(id_address: Int!): Boolean!
+    addToWishList(product:wishlistProduct!): Boolean!
 }
 
 input newUser {
@@ -70,6 +71,10 @@ input cartProduct {
     design: Int!
     size: Int!
     image: String
+}
+
+input wishlistProduct {
+    id_product: String!
 }
 
 type Item {

@@ -65,4 +65,12 @@ model product {
   description  String?
   img          String?
   order_detail order_detail[]
+  wishlist     wishlist[]
+}
+
+model wishlist {
+  id         Int     @default(autoincrement()) @id
+  id_product String
+  id_user    Int
+  product    product @relation(fields: [id_product], references: [sku])
 }

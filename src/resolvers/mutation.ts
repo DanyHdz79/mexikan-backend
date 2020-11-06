@@ -530,6 +530,56 @@ const mutation : IResolvers = {
             }
         },
 
+        async addToWishList(_:void, { product }, ctx) {
+            let info: any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            try {
+                const checkWishList = await ctx.prisma.wishlist.findMany({
+                    where: {
+                        id_user: user_id,
+                    }
+                });
+
+                const productInfo = await ctx.prisma.product.findOne({
+                    where: {
+                        sku: product.id_product,
+                    }
+                });
+
+                const repeatedProductInWishList = await ctx.prisma.wishlist.findMany({
+                    where: {
+                        id_product: product.id_product,
+                    }
+                });
+
+                if(repeatedProductInWishList) {
+                    const wishL = await ctx.prisma.wishlist.create({
+                        data: {
+                            product: {
+                                connect: {
+                                    sku: product.id_product
+                                }
+                            },
+                            id_user: user_id
+                        }
+                    })
+                    return true
+                } else {
+                    return false
+                }
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+
 
     }
 }

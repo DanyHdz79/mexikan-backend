@@ -136,6 +136,10 @@ query search($search: String!) {
   }
 }
 
+mutation addWishList($wishlistP: wishlistProduct!) {
+  addToWishList(product: $wishlistP)
+}
+
 
 // -------------------------- Query variables -----------------------
 
@@ -180,4 +184,8 @@ query search($search: String!) {
 }
 
 
-
+{
+  "wishlistP": {
+    "id_product": "MBX45927"
+  }
+}
