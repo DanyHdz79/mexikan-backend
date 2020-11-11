@@ -9,6 +9,7 @@ type Query {
     getPrincUserAddress: [Address2!]!
     report: [Order!]!
     searchBar(search: String!): [Product!]!
+    getImageColor(sku: String!, id_color: Int!): String!
 }
 
 type Mutation {

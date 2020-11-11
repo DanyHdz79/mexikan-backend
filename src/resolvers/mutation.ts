@@ -207,7 +207,7 @@ const mutation : IResolvers = {
                                 },
                                 design: product.design,
                                 size: product.size, 
-                                //img_custom: product.image
+                                img_custom: product.image
                             }
                         })
                     }
@@ -578,9 +578,6 @@ const mutation : IResolvers = {
                 return false
             }
         },
-
-
-
     }
 }
 

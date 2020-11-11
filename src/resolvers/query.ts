@@ -28,7 +28,25 @@ const query : IResolvers = {
         async getAllProducts(_:void, __:void, ctx) {
             try {
                 const products = await ctx.prisma.product.findMany({})
-                return products;
+                let prodArray = []
+
+                for(let i = 0; i < products.length; i++) {
+                    const image = await ctx.prisma.image.findMany({
+                        where: {
+                            id_product: products[i].sku
+                        }
+                    });
+                    let product = {
+                        sku: products[i].sku,
+                        name: products[i].name,
+                        price: products[i].price,
+                        description: products[i].description,
+                        img: image[0].image
+                    }
+
+                    prodArray.push(product)
+                }
+                return prodArray;
             } catch (error) {
                 console.log(error)
                 return []
@@ -47,7 +65,22 @@ const query : IResolvers = {
                         sku: product_id
                     }
                 })
-                return info;
+
+                const image = await ctx.prisma.image.findMany({
+                    where: {
+                        id_product: info.sku
+                    }
+                });
+
+                let product = {
+                    sku: info.sku,
+                    name: info.name,
+                    price: info.price,
+                    description: info.description,
+                    img: image[0].image
+                }
+
+                return product;
             } catch (error) {
                 console.log(error)
                 return []
@@ -82,6 +115,14 @@ const query : IResolvers = {
                     })
 
                     for(let i = 0; i < cartProducts.length; i++) {
+                        const img = await ctx.prisma.image.findMany({
+                            where: {
+                                id_product: cartProducts[i].id_product,
+                            }
+                        })
+
+                        let im = img[cartProducts[i].design].image
+
                         let cartItem = {
                             sku: cartProducts[i].id_product,
                             name: "",
@@ -89,8 +130,8 @@ const query : IResolvers = {
                             description: "",
                             quantity: cartProducts[i].quantity,
                             design: cartProducts[i].design,
-                            size: 0,
-                            image: cartProducts[i].size,
+                            size: cartProducts[i].size,
+                            image: im,
                         };
             
                         cartArray.push(cartItem);
@@ -105,7 +146,6 @@ const query : IResolvers = {
                         cartArray[i].name = productInfo.name;
                         cartArray[i].description = productInfo.description;
                         cartArray[i].price = productInfo.price;
-                        cartArray[i].image = productInfo.img;
                     }
 
                     return cartArray;
@@ -291,6 +331,25 @@ const query : IResolvers = {
                     }
                 })
                 return match;
+            } catch (error) {
+                console.log(error)
+                return []
+            }
+        },
+
+        async getImageColor(_:void, { sku, id_color }, ctx) {
+            try {
+                const img = await ctx.prisma.image.findMany({
+                    where: {
+                        id_product: sku
+                    }
+                })
+
+                if(id_color === 0) return img[0].image;
+                else if(id_color === 1) return img[1].image;
+                else if(id_color === 2) return img[2].image;
+                else if(id_color === 3) return img[3].image;
+                else return img[4].image;
             } catch (error) {
                 console.log(error)
                 return []

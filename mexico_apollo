@@ -140,6 +140,10 @@ mutation addWishList($wishlistP: wishlistProduct!) {
   addToWishList(product: $wishlistP)
 }
 
+query imageColor($sku: String!, $color: Int!) {
+  getImageColor(sku: $sku, id_color: $color)
+}
+
 
 // -------------------------- Query variables -----------------------
 
@@ -188,4 +192,9 @@ mutation addWishList($wishlistP: wishlistProduct!) {
   "wishlistP": {
     "id_product": "MBX45927"
   }
+}
+
+{
+  "sku":  "MBX45927",
+  "color": 2
 }

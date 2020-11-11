@@ -59,13 +59,15 @@ model order_detail {
 }
 
 model product {
-  sku          String         @id
-  name         String
-  price        Float
-  description  String?
-  img          String?
-  order_detail order_detail[]
-  wishlist     wishlist[]
+  sku                             String         @id
+  name                            String
+  price                           Float
+  description                     String?
+  id_img                          Int?
+  image_imageToproduct_id_img     image?         @relation("imageToproduct_id_img", fields: [id_img], references: [id])
+  image_image_id_productToproduct image[]        @relation("image_id_productToproduct")
+  order_detail                    order_detail[]
+  wishlist                        wishlist[]
 }
 
 model wishlist {
@@ -73,4 +75,12 @@ model wishlist {
   id_product String
   id_user    Int
   product    product @relation(fields: [id_product], references: [sku])
+}
+
+model image {
+  id                                Int       @default(autoincrement()) @id
+  image                             String?
+  id_product                        String
+  product_image_id_productToproduct product   @relation("image_id_productToproduct", fields: [id_product], references: [sku])
+  product_imageToproduct_id_img     product[] @relation("imageToproduct_id_img")
 }
