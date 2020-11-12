@@ -9,6 +9,7 @@ const specialChar = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
 
 const mutation : IResolvers = {
     Mutation: {
+        // Mutation for the registration of new users
         async register(_:void, { user }, ctx) {
             const checkUser = await ctx.prisma.user.findMany({
                 where: {
@@ -47,6 +48,7 @@ const mutation : IResolvers = {
             }
         },
 
+        // Mutation that allows a user to add an addresses to their account
         async addAddress(_:void, { address }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -108,6 +110,7 @@ const mutation : IResolvers = {
             }
         },
 
+        // Mutation that allows a user to delete an addresses they have previously registered
         async deleteAddress(_:void, { id_address }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -127,6 +130,7 @@ const mutation : IResolvers = {
             }
         },
 
+        // Mutation for sending an email to support through the Contact Us form
         async email(_:void, { contact }, __:void) {
             let mail:any = new nmail()
             var mailOptions = {
@@ -140,6 +144,7 @@ const mutation : IResolvers = {
             return true
         },
 
+        // Mutation that allows a user to add a product to their cart
         async addProductToCart(_:void, { product }, ctx) {
 
             let today = new Date();
@@ -313,6 +318,118 @@ const mutation : IResolvers = {
             }
         },
 
+        // Mutation that allows a user to delete a product from their cart
+        async deleteItem(_:void, { id_item }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const deleteItem = await ctx.prisma.order_detail.delete({
+                    where: {
+                        id: id_item,
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        // Mutation that checks if the user's shopping cart already has the product
+        // they have chosen to add, and if so, increases the quantity of it by 1
+        async addQuantity(_:void, { id_item }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const increment = await ctx.prisma.order_detail.update({
+                    where: {
+                        id: id_item,
+                    },
+                    data: {
+                        quantity: {
+                            increment: 1
+                        }
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        // Mutation that checks if the user's shopping cart already has the product
+        // they have chosen to add, and if so, decreases the quantity of it by 1
+        async subtQuantity(_:void, { id_item }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            try {
+                const decrement = await ctx.prisma.order_detail.update({
+                    where: {
+                        id: id_item,
+                    },
+                    data: {
+                        quantity: {
+                            decrement: 1
+                        }
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        // Mutation that turns the shopping cart to a complete order after
+        // the user goes through with their purchase
+        async convertToOrder(_:void, { id_address }, ctx) {
+            let info:any = new JWT().verify(ctx.token)
+            if (info === "failed") {
+                return false
+            }
+
+            let decoded:any = new JWT().decode(ctx.token)
+            let user_id = decoded.user
+
+            try {
+                const findCarrito = await ctx.prisma.order.findMany({
+                    where: {
+                        id_user: user_id,
+                        status: true
+                    }
+                });
+
+                const order = await ctx.prisma.order.update({
+                  where: {
+                        id: findCarrito[0].id
+                    },
+                    data: {
+                        status: false,
+                        address: {
+                            connect: {
+                                id: id_address
+                            }
+                        }
+                    }
+                });
+                return true
+            } catch (error) {
+                console.log(error);
+                return false
+            }
+        },
+
+        // Mutation that allows a user to modify their name in their account's details
         async updateUserName(_:void, { new_name }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -338,6 +455,7 @@ const mutation : IResolvers = {
             }
         },
 
+        // Mutation that allows a user to modify their password
         async updateUserPassword(_:void, { password }, ctx) {
             let verification = false
 
@@ -378,110 +496,7 @@ const mutation : IResolvers = {
             }
         },
 
-        async convertToOrder(_:void, { id_address }, ctx) {
-            let info:any = new JWT().verify(ctx.token)
-            if (info === "failed") {
-                return false
-            }
-
-            let decoded:any = new JWT().decode(ctx.token)
-            let user_id = decoded.user
-
-            try {
-                const findCarrito = await ctx.prisma.order.findMany({
-                    where: {
-                        id_user: user_id,
-                        status: true
-                    }
-                });
-
-                const order = await ctx.prisma.order.update({
-                  where: {
-                        id: findCarrito[0].id
-                    },
-                    data: {
-                        status: false,
-                        address: {
-                            connect: {
-                                id: id_address
-                            }
-                        }
-                    }
-                });
-                return true
-            } catch (error) {
-                console.log(error);
-                return false
-            }
-        },
-
-        async deleteItem(_:void, { id_item }, ctx) {
-            let info:any = new JWT().verify(ctx.token)
-            if (info === "failed") {
-                return false
-            }
-
-            try {
-                const deleteItem = await ctx.prisma.order_detail.delete({
-                    where: {
-                        id: id_item,
-                    }
-                });
-                return true
-            } catch (error) {
-                console.log(error);
-                return false
-            }
-        },
-
-        async addQuantity(_:void, { id_item }, ctx) {
-            let info:any = new JWT().verify(ctx.token)
-            if (info === "failed") {
-                return false
-            }
-
-            try {
-                const increment = await ctx.prisma.order_detail.update({
-                    where: {
-                        id: id_item,
-                    },
-                    data: {
-                        quantity: {
-                            increment: 1
-                        }
-                    }
-                });
-                return true
-            } catch (error) {
-                console.log(error);
-                return false
-            }
-        },
-
-        async subtQuantity(_:void, { id_item }, ctx) {
-            let info:any = new JWT().verify(ctx.token)
-            if (info === "failed") {
-                return false
-            }
-
-            try {
-                const decrement = await ctx.prisma.order_detail.update({
-                    where: {
-                        id: id_item,
-                    },
-                    data: {
-                        quantity: {
-                            decrement: 1
-                        }
-                    }
-                });
-                return true
-            } catch (error) {
-                console.log(error);
-                return false
-            }
-        },
-
+        // Mutation that allows a user to set their default address
         async princAddress(_:void, { id_address }, ctx) {
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
@@ -530,6 +545,7 @@ const mutation : IResolvers = {
             }
         },
 
+        // Mutation that allows a user to add a product to their wish list
         async addToWishList(_:void, { product }, ctx) {
             let info: any = new JWT().verify(ctx.token)
             if (info === "failed") {
