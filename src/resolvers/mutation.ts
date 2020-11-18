@@ -3,14 +3,18 @@ import bcryptjs from 'bcryptjs';
 import JWT from "../lib/JWT";
 import nmail from "../lib/nmail";
 
+// Regex expressions for password validation
 const hasNumber = /\d/;
 const hasLetter = /[a-zA-Z]/g;
 const specialChar = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
 
 const mutation : IResolvers = {
     Mutation: {
-        // Mutation for the registration of new users
+        
         async register(_:void, { user }, ctx) {
+            // Mutation for the registration of new users
+            // As a parameter, it accepts an object with the user's email, name and password.
+
             const checkUser = await ctx.prisma.user.findMany({
                 where: {
                     email: user.email
@@ -21,6 +25,7 @@ const mutation : IResolvers = {
                 return { status: false, message: "The user already exists." }
             }
 
+            // Password must meet the following criteria
             if(user.password.length < 10 || user.password.length > 15) {
                 return { status: false, message: "Password should be between 10 and 15 characters." }
             }
@@ -38,7 +43,7 @@ const mutation : IResolvers = {
                         email: user.email,
                         name: user.name,
                         password: user.password,
-                        role: "user"
+                        role: "user" // each user can be a 'seller' or just normal 'user', by default is the later.
                     }
                 })
                 return { status:true, message: `The user ${user.name} is successfully added.` }
@@ -48,8 +53,11 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to add an addresses to their account
         async addAddress(_:void, { address }, ctx) {
+            // Mutation that allows a user to add an addresses to their account
+            // As a parameter, it receives an object with all the address' attributes
+            // By default, the first address added for each user is marked as principal
+            
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -110,8 +118,9 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to delete an addresses they have previously registered
         async deleteAddress(_:void, { id_address }, ctx) {
+            // Mutation that allows a user to delete an addresses they have previously registered
+
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -130,8 +139,11 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation for sending an email to support through the Contact Us form
         async email(_:void, { contact }, __:void) {
+            // Mutation for sending an email to support through the Contact Us form
+            // two supponrting email addresses are being used: one for sending the message
+            // with the user's info, and one for reiceiving that message.
+
             let mail:any = new nmail()
             var mailOptions = {
                 from: 'Remitente',
@@ -144,8 +156,9 @@ const mutation : IResolvers = {
             return true
         },
 
-        // Mutation that allows a user to add a product to their cart
         async addProductToCart(_:void, { product }, ctx) {
+            // Mutation that allows a user to add a product to their cart
+            // The user must be logged and verified.
 
             let today = new Date();
 
@@ -158,6 +171,7 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
+                // First, we check if there's already an 'opened' order
                 const checkOrder = await ctx.prisma.order.findMany({
                     where: {
                         id_user: user_id,
@@ -171,10 +185,9 @@ const mutation : IResolvers = {
                     }
                 });
     
-                //if existe order con id_user
+                //if an 'opened' order exists...
                 if(checkOrder && checkOrder.length) {
-                    //crea order_detail y añade a esa order
-                    
+                    //if a product that has been previously added is added again, just increase queantity
                     const repeatedProduct = await ctx.prisma.order_detail.findMany({
                         where: {
                             id_product: product.id_product,
@@ -183,7 +196,7 @@ const mutation : IResolvers = {
                             size: product.size
                         }
                     });
-
+                    
                     if(repeatedProduct && repeatedProduct.length) {
                         const upQuantity = await ctx.prisma.order_detail.update({
                             where: {
@@ -197,6 +210,7 @@ const mutation : IResolvers = {
                         })
 
                     } else {
+                        //otherwise just generate a new order detail for the product being added
                         const orderD = await ctx.prisma.order_detail.create({
                             data: {
                                 quantity: product.quantity,
@@ -217,7 +231,7 @@ const mutation : IResolvers = {
                         })
                     }
                     
-                    //actualizar order
+                    //and update the main order
                     const updateOrder = await ctx.prisma.order.update({
                         where: {
                             id: checkOrder[0].id
@@ -241,6 +255,9 @@ const mutation : IResolvers = {
                     })
 
                 } else {
+                    // If this is the first item being added to the cart
+                    // we create an order and an order detail for the product
+
                     const default_address = await ctx.prisma.address.findMany({
                         where: {
                             id_user: user_id,
@@ -248,9 +265,9 @@ const mutation : IResolvers = {
                         }
                     })
 
-                    //else crea order y añade order_detail
                     let newOrder
 
+                    // The order is created using the user's principal address
                     if(default_address && default_address.length) {
                         newOrder = await ctx.prisma.order.create({
                             data: {
@@ -307,7 +324,7 @@ const mutation : IResolvers = {
                             },
                             design: product.design,
                             size: product.size, 
-                            //img_custom: product.image
+                            img_custom: product.image
                         }
                     })
                 }
@@ -318,8 +335,10 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to delete a product from their cart
         async deleteItem(_:void, { id_item }, ctx) {
+            // Mutation that allows a user to delete a product from their cart
+            // it accepst the product's sku as parameter
+
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -338,9 +357,10 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that checks if the user's shopping cart already has the product
-        // they have chosen to add, and if so, increases the quantity of it by 1
         async addQuantity(_:void, { id_item }, ctx) {
+            // Mutation that checks if the user's shopping cart already has the product
+            // they have chosen to add, and if so, increases the quantity of it by 1
+
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -364,9 +384,10 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that checks if the user's shopping cart already has the product
-        // they have chosen to add, and if so, decreases the quantity of it by 1
         async subtQuantity(_:void, { id_item }, ctx) {
+            // Mutation that checks if the user's shopping cart already has the product
+            // they have chosen to add, and if so, decreases the quantity of it by 1
+
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -390,9 +411,12 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that turns the shopping cart to a complete order after
-        // the user goes through with their purchase
         async convertToOrder(_:void, { id_address }, ctx) {
+            // Mutation that turns the shopping cart to a complete order after
+            // the user goes through with their purchase
+            // the user's id address must be passed to complete the order
+            // naturally, the user must be logged and verified.
+
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -429,8 +453,8 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to modify their name in their account's details
         async updateUserName(_:void, { new_name }, ctx) {
+            // Mutation that allows a user to modify their name in their account's details
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -455,8 +479,11 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to modify their password
         async updateUserPassword(_:void, { password }, ctx) {
+            // Mutation that allows a user to modify their password
+            // As a parameter, the pair of passwords must be passed (current and new)
+            // this pair will be user to verify if the current password matchesand allow the update
+
             let verification = false
 
             let info:any = new JWT().verify(ctx.token)
@@ -496,8 +523,9 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to set their default address
         async princAddress(_:void, { id_address }, ctx) {
+            // Mutation that allows a user to set their default or principal address
+
             let info:any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false
@@ -507,6 +535,9 @@ const mutation : IResolvers = {
             let user_id = decoded.user
 
             try {
+                //if some other address was already marked as principal, 
+                //we look for it and the 'unmark' it
+
                 const princ = await ctx.prisma.address.findMany({
                     where: {
                         id_user: user_id,
@@ -545,8 +576,8 @@ const mutation : IResolvers = {
             }
         },
 
-        // Mutation that allows a user to add a product to their wish list
         async addToWishList(_:void, { product }, ctx) {
+            // Mutation that allows a user to add a product to their wish list
             let info: any = new JWT().verify(ctx.token)
             if (info === "failed") {
                 return false

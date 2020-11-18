@@ -1,3 +1,5 @@
+// class for contact form management: sending emails
+
 class nmail {
     private nodemailer:any
 
