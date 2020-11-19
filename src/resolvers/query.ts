@@ -141,6 +141,7 @@ const query : IResolvers = {
 
                         let cartItem = {
                             sku: cartProducts[i].id_product,
+                            id_detail: cartProducts[i].id,
                             name: "",
                             price: 0.0,
                             description: "",

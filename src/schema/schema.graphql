@@ -80,6 +80,7 @@ input wishlistProduct {
 
 type Item {
     sku: String!
+    id_detail: Int!
     name: String!
     price: Float!
     description: String!
